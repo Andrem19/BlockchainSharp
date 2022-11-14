@@ -14,21 +14,21 @@ namespace BlockchainSharp
         public List<Transaction> _transactions { get; private set; }
         public string _lastHash { get; private set; }
         public long _timastamp { get; private set; }
-        public byte[] _forger { get; private set; }
-        public byte[] _signature { get; private set; }
+        public string _forger { get; private set; }
+        public string _signature { get; private set; }
 
-        public Block(List<Transaction> transactions, string lastHash, byte[] forger, int blockCount)
+        public Block(List<Transaction> transactions, string lastHash, string forger, int blockCount)
         {
             _blockCount= blockCount;
             _transactions = transactions;
             _lastHash= lastHash;
             _timastamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             _forger= forger;
-            _signature = new byte[0];
+            _signature = "";
         }
         public static Block Genesis()
         {
-            var genesisBlock = new Block(new List<Transaction>(), "genesisHash", Encoding.UTF8.GetBytes("genesis"), 0);
+            var genesisBlock = new Block(new List<Transaction>(), "genesisHash", "genesis", 0);
             genesisBlock._timastamp = 0;
             return genesisBlock;
         }
@@ -43,7 +43,7 @@ namespace BlockchainSharp
             json["_signature"] = "";
             return json.ToString();
         }
-        public void Sign(byte[] signature)
+        public void Sign(string signature)
         {
             _signature = signature;
         }

@@ -25,41 +25,41 @@ namespace BlockchainSharp
             return signedHash;
         }
 
-        public static bool SignatureValid(string data, byte[] signature, byte[] publicKey)
+        public static bool SignatureValid(string data, string signature, string publicKey)
         {
             using (RSA rsa = RSA.Create())
             {
-                //RSAParameters p = rsa.ExportParameters(false);
-                //p.Modulus = publicKey;
-                //p.Exponent = publicKey;
-                //rsa.ImportParameters(p);
-                rsa.ImportSubjectPublicKeyInfo(publicKey, out _);
+                byte[] publicKeyBytes = Convert.FromBase64String(publicKey);
+                rsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
                 RSAPKCS1SignatureDeformatter rsaDeformatter = new(rsa);
                 rsaDeformatter.SetHashAlgorithm(nameof(SHA256));
                 byte[] dataHash = BlockchainUtils.Hash(data);
-
-                bool res = rsaDeformatter.VerifySignature(dataHash, signature);
+                byte[] signatureBytes = Convert.FromBase64String(signature);
+                bool res = rsaDeformatter.VerifySignature(dataHash, signatureBytes);
                 return res;
             }
         }
 
-        public byte[] GetPublicKeyBytes()
+        public string GetPublicKeyString()
         {
-            byte[] publicKey = _rsa.ExportSubjectPublicKeyInfo();
-            return publicKey;
+            byte[] publicKeyByte = _rsa.ExportSubjectPublicKeyInfo();
+            string publicKeyString = Convert.ToBase64String(publicKeyByte);
+            return publicKeyString;
         }
         public Transaction CreateTransaction(string receiver, decimal amount, string type)
         {
-            Transaction transaction = new Transaction(GetPublicKeyBytes(), receiver, amount, type);
+            Transaction transaction = new Transaction(GetPublicKeyString(), receiver, amount, type);
             byte[] signature = Sign(transaction.Payload());
-            transaction.Sign(signature);
+            string signatureString = Convert.ToBase64String(signature);
+            transaction.Sign(signatureString);
             return transaction;
         }
         public Block CreateBlock(List<Transaction> transactions, string lastHash, int blockCount)
         {
-            var block = new Block(transactions, lastHash, GetPublicKeyBytes(), blockCount);
+            var block = new Block(transactions, lastHash, GetPublicKeyString(), blockCount);
             var signature = Sign(block.Payload());
-            block.Sign(signature);
+            string signatureString = Convert.ToBase64String(signature);
+            block.Sign(signatureString);
             return block;
         }
     }

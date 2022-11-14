@@ -21,7 +21,7 @@ namespace SharpChain
 
 			string transactionPayload = transaction.Payload();
             
-			bool signatureValid = Wallet.SignatureValid(transactionPayload, transaction._signature, wallet.GetPublicKeyBytes());
+			bool signatureValid = Wallet.SignatureValid(transactionPayload, transaction._signature, wallet.GetPublicKeyString());
 			
 			if (signatureValid)
 			{
