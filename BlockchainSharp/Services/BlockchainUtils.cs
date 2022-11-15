@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlockchainSharp
+namespace BlockchainSharp.Services
 {
     public static class BlockchainUtils
     {
@@ -22,6 +23,10 @@ namespace BlockchainSharp
             foreach (byte b in ba)
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
+        }
+        public static T DeserializeData<T>(Message message)
+        {
+            return JsonConvert.DeserializeObject<T>(message._data);
         }
 
     }
