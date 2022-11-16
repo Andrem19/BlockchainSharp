@@ -70,14 +70,15 @@ namespace BlockchainSharp
                     receiver.Bind($"tcp://*:{port}");
                     while (true)
                     {
-                        var message = receiver.TryReceiveFrameString(out receivedMessage);
+                        TimeSpan timeout = new TimeSpan(0, 0, 2);
+                        var message = receiver.TryReceiveFrameString(timeout, out receivedMessage);
 
                         if (!string.IsNullOrEmpty(receivedMessage))
                         {
                             Console.WriteLine($"Message recived {receivedMessage}");
                             NodeMessage(receivedMessage);
+                            receiver.TrySendFrame($"{_socketConnector._ip}:{_socketConnector._port}");
                         }
-                        receiver.TrySendFrame($"{_socketConnector._ip}:{_socketConnector._port}");
                         //Thread.Sleep(2000);
                         //Console.WriteLine($"Server{port} Alive...");
                     }
@@ -117,21 +118,27 @@ namespace BlockchainSharp
             {
                 foreach (var peer in _peers)
                 {
+
                     using (var sender = new DealerSocket())
                     {
                         sender.Connect($"tcp://{peer._ip}:{peer._port}");
-
+                        string receivedMessage;
                         var msg = message;
-                        sender.SendFrame(msg);
-                        string receivedMessage = sender.ReceiveFrameString();
-                        if (string.IsNullOrEmpty(receivedMessage))
+                        sender.TrySendFrame(msg);
+                        TimeSpan timeout = new TimeSpan(0, 0, 1);
+                        bool isMessage = sender.TryReceiveFrameString(timeout, out receivedMessage);
+                        if (!isMessage)
                         {
-                            _peers.Remove(peer);
-                            Console.WriteLine($"Peer {peer._ip}:{peer._port} leave us...");
+                            Mutex mutex3 = new Mutex();
+                            mutex3.WaitOne();
+                            bool isRemoves = _peers.Remove(peer);
+                            if (isRemoves)
+                                Console.WriteLine($"Peer {peer._ip}:{peer._port} leave us...");
+                            mutex3.ReleaseMutex();
                         }
                     }
+
                 }
-                
             }
             catch (Exception)
             {
@@ -144,23 +151,33 @@ namespace BlockchainSharp
             try
             {
                 Console.WriteLine("Connect With First Node Called");
-                var message = PeerDiscoveryHandler.HandshakeMessage();
-
+                //var message = PeerDiscoveryHandler.HandshakeMessage();
+                var mes = new Message(_socketConnector, "HANDSHAKE", "Hi");
+                string message = JsonConvert.SerializeObject(mes);
                 using (var sender = new DealerSocket())
                 {
                     sender.Connect($"tcp://{ip}:{port}");
-
+                    string receivedMessage;
                     sender.TrySendFrame(message);
                     Console.WriteLine($"Messaage sent: {message}");
-                    string receivedMessage = sender.ReceiveFrameString();
-                    if (!string.IsNullOrEmpty(receivedMessage))
+                    TimeSpan timeout = new TimeSpan(0, 0, 1);
+                    bool isMessage = sender.TryReceiveFrameString(timeout, out receivedMessage);
+                    if (isMessage)
                     {
+                        Mutex mutex2 = new();
+                        bool ismutex = mutex2.WaitOne();
                         SocketConnector newPeer = new SocketConnector(ip, port);
                         _peers.Add(newPeer);
+                        mutex2.ReleaseMutex();
                         Console.WriteLine($"Connection esteblished {receivedMessage}");
                     }
                     else
                     {
+                        if (_peers.Exists(x => x._ip == ip && x._port == port))
+                        {
+                            var peer = _peers.FirstOrDefault(x => x._ip == ip && x._port == port);
+                            _peers.Remove(peer);
+                        }
                         Console.WriteLine("ConnectWithNode: message was null or empty");
                     }
                 }

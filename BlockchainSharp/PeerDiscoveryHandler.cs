@@ -28,22 +28,25 @@ namespace BlockchainSharp
                 }
                 Thread.Sleep(10000);
             }
+            
         }
         public static async Task Discovery()
         {
+            Mutex mutex1 = new();
             while (true)
             {
+                bool ismutex = mutex1.WaitOne();
                 string handshakeMessage = HandshakeMessage();
                 SocketCommunication.Broadcast(handshakeMessage);
                 Console.WriteLine($"Discovery Alive...");
+                mutex1.ReleaseMutex();
                 Thread.Sleep(10000);
             }
         }
         public static string HandshakeMessage()
         {
             var ownConnector = SocketCommunication._socketConnector;
-            var ownPeers = SocketCommunication._peers;
-            var data = ownPeers;
+            var data = SocketCommunication._peers;
             string messageType = "DISCOVERY";
             var message = new Message(ownConnector, messageType, JsonConvert.SerializeObject(data));
             string encodingMessage = JsonConvert.SerializeObject(message);
@@ -58,11 +61,14 @@ namespace BlockchainSharp
             foreach (var peer in SocketCommunication._peers)
             {
                 if (peer.Equals(peersSocketConnector))
+                {
                     newPeer = false;
+                } 
             }
             if (newPeer)
+            {
                 SocketCommunication._peers.Add(peersSocketConnector);
-
+            }
             foreach (var peersPeer in peersPeerList)
             {
                 bool peerKnown = false;
