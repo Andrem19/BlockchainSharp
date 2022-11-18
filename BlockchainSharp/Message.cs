@@ -1,4 +1,4 @@
-﻿using BlockchainSharp.Services;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,16 +7,24 @@ using System.Threading.Tasks;
 
 namespace BlockchainSharp
 {
-    public class Message
+    class Message
     {
-        public SocketConnector _senderConnector { get; set; }
+        public string _sender { get; set; }
         public string _messageType { get; set; }
         public string _data { get; set; }
-        public Message(SocketConnector senderConnector, string messageType, string data)
+
+        public Message(string sender, string messageType, string data)
         {
-            _senderConnector = senderConnector;
+            _sender = sender;
             _messageType = messageType;
             _data = data;
         }
+        public static string CreateMessage(string sender, string messageType, string data)
+        {
+            var msg = new Message(sender, messageType, data);
+            string msgStr = JsonConvert.SerializeObject(msg);
+            return msgStr;
+        }
     }
+    
 }

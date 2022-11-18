@@ -10,13 +10,13 @@ namespace BlockchainSharp
 {
     public class Transaction
     {
-        public string _senderPublicKey { get; private set; }
-        public string _receiverPublicKey { get; private set; }
-        public decimal _amount { get; private set; }
-        public string _type { get; private set; }
-        public Guid _id { get; private set; }
-        public long _timestamp { get; private set; }
-        public string _signature { get; private set; }
+        public string _senderPublicKey { get; set; }
+        public string _receiverPublicKey { get; set; }
+        public decimal _amount { get; set; }
+        public string _type { get; set; }
+        public Guid _id { get; set; }
+        public long _timestamp { get; set; }
+        public string _signature { get; set; }
 
         public Transaction(string senderPublicKey, string receiverPublicKey, 
             decimal amount, string type)
@@ -28,6 +28,21 @@ namespace BlockchainSharp
             _id = Guid.NewGuid();
             _timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             _signature = "";
+        }
+        public Transaction(string senderPublicKey, Guid id, long date, string receiverPublicKey,
+            decimal amount, string type, string signature)
+        {
+            _senderPublicKey = senderPublicKey;
+            _receiverPublicKey = receiverPublicKey;
+            _amount = amount;
+            _type = type;
+            _id = id;
+            _timestamp = date;
+            _signature = signature;
+        }
+        public Transaction()
+        {
+
         }
         public string toJson()
         {

@@ -24,10 +24,7 @@ namespace BlockchainSharp.Services
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
         }
-        public static T DeserializeData<T>(Message message)
-        {
-            return JsonConvert.DeserializeObject<T>(message._data);
-        }
+
 
     }
 }

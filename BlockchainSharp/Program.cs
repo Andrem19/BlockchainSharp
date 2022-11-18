@@ -1,4 +1,5 @@
 ﻿using BlockchainSharp;
+using Microsoft.Extensions.Logging;
 
 namespace SharpChain
 {
@@ -92,17 +93,19 @@ namespace SharpChain
             //blockchain.AddBlock(blockTwo);
 
             //Console.WriteLine(blockchain.toJson());
-            string ip = args[0];
-            string port = args[1];
-            //string ip = "127.0.0.1";
-            //string port = "10015";
+            //string ip = args[0];
+            //string port = args[1];
+            string ip = "127.0.0.1";
+            string port = "10015";
             Console.WriteLine($"Ip = {ip}; Port = {port}");
             //SocketCommunication.SocetConnectorInit(ip, port);
-            var node = new Node(ip, port);
-            await node.StartP2P();
+            
+            //var node = new Node(ip, port);
+            //Task startP2p = new Task(() => node.StartP2P());
+            //startP2p.Start();
             //SocketCommunication.StartSocketCommunication(port);
             Console.WriteLine("Start...");
-			Console.ReadLine();
+            Console.ReadLine();
         }
 	}
 }
